@@ -1,0 +1,122 @@
+[
+{
+    "city_name": "Hong Kong",
+    "property_title": "Regal Riverside Hotel",
+    "hotel_id": 436847,
+    "price": 60,
+    "rating": "4.0",
+    "address": "Near Sha Tin Metro Station|Sha Tin",
+    "latitude": 22.382296090738947,
+    "longitude": 114.1964110737234,
+    "room_type": "Standard Room",
+    "image": "https://ak-d.tripcdn.com/images/20030d0000006t06x4DFA_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "iclub Fortress Hill Hotel",
+    "hotel_id": 1171374,
+    "price": 56,
+    "rating": "4.1",
+    "address": "Near Fortress Hill Metro Station|North Point and Quarry Bay",
+    "latitude": 22.287170682823817,
+    "longitude": 114.19282618133632,
+    "room_type": "ISelect Room",
+    "image": "https://ak-d.tripcdn.com/images/fd/hotel/g2/M0A/9C/66/CghzgFTUbwSAC6b4ADZljQLkQPQ674_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "Regala Skycity Hotel",
+    "hotel_id": 92764015,
+    "price": 96,
+    "rating": "4.2",
+    "address": "Near Asia World-Expo|HongKong International Airport",
+    "latitude": 22.319201612060848,
+    "longitude": 113.94205090049421,
+    "room_type": "Garden View Room",
+    "image": "https://ak-d.tripcdn.com/images/02051120009ggq56q1F83_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "Mandarin Oriental Hong Kong",
+    "hotel_id": 344946,
+    "price": 435,
+    "rating": "4.8",
+    "address": "Near Lan Kwai Fong|Central",
+    "latitude": 22.28194935057504,
+    "longitude": 114.15936633560484,
+    "room_type": "Statue Square View Room-Twin Beds",
+    "image": "https://ak-d.tripcdn.com/images/hotel/7000/6979/D0309164-F929-4C1E-A1F1-53B4D1D102A0_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "The Charterhouse Causeway Bay",
+    "hotel_id": 436852,
+    "price": 62,
+    "rating": "3.9",
+    "address": "Near Causeway Bay Metro Station|Wan Chai and Causeway Bay",
+    "latitude": 22.27771728862506,
+    "longitude": 114.17908884692756,
+    "room_type": "Superior Room-Two Beds",
+    "image": "https://ak-d.tripcdn.com/images/1mc6y12000dv9uwut2C9D_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "The Harbourview-Chinese YMCA of Hong Kong",
+    "hotel_id": 436871,
+    "price": 80,
+    "rating": "4.3",
+    "address": "Near Central|Wan Chai and Causeway Bay",
+    "latitude": 22.280217883621464,
+    "longitude": 114.17110709148008,
+    "room_type": "Premier Twin Room",
+    "image": "https://ak-d.tripcdn.com/images/0201p120008roa08e998E_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "Dorsett Tsuen Wan",
+    "hotel_id": 778134,
+    "price": 59,
+    "rating": "4.0",
+    "address": "Near Kwai Hing Metro Station|Tsuen Wan",
+    "latitude": 22.37047930326727,
+    "longitude": 114.12955247609395,
+    "room_type": "Superior Room",
+    "image": "https://ak-d.tripcdn.com/images/0220s12000a8yu97u5FBF_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "Regal Hongkong Hotel",
+    "hotel_id": 370815,
+    "price": 117,
+    "rating": "4.0",
+    "address": "Near North Point|Wan Chai and Causeway Bay",
+    "latitude": 22.279198864046535,
+    "longitude": 114.18677113931746,
+    "room_type": "Superior Room",
+    "image": "https://ak-d.tripcdn.com/images/220a0v000000jrk3k2D63_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "Empire Hotel Hong Kong－Wan Chai",
+    "hotel_id": 426549,
+    "price": 93,
+    "rating": "4.2",
+    "address": "Near Wan Chai Metro Station|Wan Chai and Causeway Bay",
+    "latitude": 22.277753457069544,
+    "longitude": 114.17017571974729,
+    "room_type": "Standard Room (with Unlimited 5G Wi-Fi)",
+    "image": "https://ak-d.tripcdn.com/images/1mc0c12000bihzgg70C12_R_250_250_R5_D.jpg_.webp"
+},
+{
+    "city_name": "Hong Kong",
+    "property_title": "South Nest",
+    "hotel_id": 99817230,
+    "price": 38,
+    "rating": "4.0",
+    "address": "Near Little Hong Kong|Southern",
+    "latitude": 22.249899657684377,
+    "longitude": 114.14763212844451,
+    "room_type": "Superior Twin Room",
+    "image": "https://ak-d.tripcdn.com/images/0202w12000a6rwrji6D9A_R_250_250_R5_D.jpg_.webp"
+}
+]
