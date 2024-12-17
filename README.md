@@ -1,8 +1,51 @@
-# Installing Postgresql
+
+## Internship_w3_Assignment8
+
+
+# Scrape Property Info into Postgres database Internship Project A8
+
+## Table of Contents 
+1. [Overview](#overview) 
+2. [Key Features](#key-features) 
+3.  [Technologies Used](#technologies-used) 
+5. [Development Setup](#development-setup) 
+6. [Project Structure](#project-structure) 
+7. [Author](#author)
+
+
+## Overview
+This a project where scrapy spider have been used to scrape data from a website: https://uk.trip.com/hotels/?locale=en-GB&curr=GBP and store them into postgres database. The project also involves code coverage testing.
+
+## Key Features 
+- **Scraping Data**: Scraping the data from website, the property details of all the hotels among all the cities  get scraped.
+- **Selected Data**: Among all the cities, random 3 cities get selected and stores their hotel details.
+ - **Postgres Table**: The selected data can be seen in the postgres table.
+
+
+## Technologies Used
+
+- **Framework**: Scrapy
+- **Database**: Postgres with SqlAlchemy
+- **Testing**: Python `unittest` 
+
+
+## Development Setup
+
+### Prerequisites
+
+Ensure the following are installed on your system:
+
+- Python 3.10 or higher
+- Scrapy
+- PostgreSQL with SqlAlchemy extension 
+
+
+### Installing PostgreSQL
 1. If not installed, use Homebrew:
     ```bash
     Copy code
-    brew install postgresql```
+    brew install postgresql
+    ```
 
 2. After installation, create the myuser using the following commands,
     ```bash
@@ -21,7 +64,7 @@
     print("Connected successfully!")
     connection.close()
     ```
-# Installing uv & running the project.
+## Installing uv & running the project.
 Please intsall uv to create the virtual environemnt.
 
 ```bash    
@@ -39,3 +82,8 @@ Now run the following command to run the project.
 uv run python main.py
 ```
 
+## Author
+
+Rubayet Shareen
+SWE Intern, W3 Engineers
+Dhaka, Bangladesh
