@@ -2,12 +2,14 @@ import os
 import scrapy
 import json
 import re
-import random
+import requests
 from scrapy.crawler import CrawlerProcess
 from sqlalchemy import create_engine, Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import random  
 
+# Database ORM setup
 Base = declarative_base()
 
 class Property(Base):
@@ -23,136 +25,145 @@ class Property(Base):
     price = Column(Float, nullable=True)
     image_path = Column(String, nullable=True)
 
+def setup_database():
+    """Database connection setup"""
+    engine = create_engine('postgresql+psycopg2://myuser:ulala@localhost:5432/tripcom_db')
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    return Session()
+
+def save_to_database(data, session):
+    """Save hotel data to PostgreSQL database"""
+    property_entry = Property(**data)
+    session.add(property_entry)
+    session.commit()
+
+def save_to_json(data, json_file):
+    """Save hotel data to JSON file"""
+    with open(json_file, 'a') as f:
+        f.write(json.dumps(data) + "\n")
+
 class TripComSpider(scrapy.Spider):
     name = "tripCrawler"
     allowed_domains = ["uk.trip.com"]
     start_urls = ["https://uk.trip.com/hotels/?locale=en-GB&curr=GBP"]
 
+    def __init__(self, session, json_file, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.session = session
+        self.json_file = json_file
+
     def parse(self, response):
+        """Extract city list and randomly select 3 cities"""
         script_data = response.xpath("//script[contains(text(), 'window.IBU_HOTEL')]/text()").get()
         if script_data:
             match = re.search(r"window\.IBU_HOTEL\s*=\s*(\{.*?\});", script_data, re.DOTALL)
             if match:
-                json_data = match.group(1)
                 try:
-                    ibu_hotel_data = json.loads(json_data)
+                    ibu_hotel_data = json.loads(match.group(1))
                     inbound_cities = ibu_hotel_data.get("initData", {}).get("htlsData", {}).get("inboundCities", [])
                     outbound_cities = ibu_hotel_data.get("initData", {}).get("htlsData", {}).get("outboundCities", [])
 
-                    cities_to_search = [inbound_cities, outbound_cities]
-                    random_location_to_search = random.choice(cities_to_search)
+                    all_cities = [city for group in [inbound_cities, outbound_cities] for city in group]
+                    selected_cities = random.sample(all_cities, min(3, len(all_cities)))  # Randomly pick up to 3 cities
 
-                    valid_cities = [city for city in random_location_to_search]
-                    if not valid_cities:
-                        self.logger.warning("No cities with recommend hotels found")
-                        return
+                    self.logger.info(f"Selected cities: {[city.get('name') for city in selected_cities]}")
 
-                    selected_city = random.choice(valid_cities)
-                    city_name = selected_city.get("name", "Unknown")
-                    city_id = selected_city.get("id", "")
+                    for city in selected_cities:
+                        city_name = city.get("name", "Unknown")
+                        city_id = city.get("id", "")
 
-                    if not city_id:
-                        self.logger.warning(f"No ID found for city: {city_name}")
-                        return
-
-                    city_hotels_url = f"https://uk.trip.com/hotels/list?city={city_id}"
-                    yield scrapy.Request(
-                        url=city_hotels_url, 
-                        callback=self.parse_city_hotels, 
-                        meta={'city_name': city_name}
-                    )
-
-                except json.JSONDecodeError as e:
-                    self.logger.error(f"Failed to parse JSON: {e}")
+                        if city_id:
+                            hotels_url = f"https://uk.trip.com/hotels/list?city={city_id}&page=1"
+                            yield scrapy.Request(
+                                url=hotels_url,
+                                callback=self.parse_city_hotels,
+                                meta={'city_name': city_name, 'city_id': city_id, 'page': 1}
+                            )
+                except json.JSONDecodeError:
+                    self.logger.error("Failed to parse city data JSON")
                 except Exception as e:
-                    self.logger.error(f"An unexpected error occurred: {e}")
+                    self.logger.error(f"Unexpected error: {e}")
 
     def parse_city_hotels(self, response):
-        script_data = response.xpath("//script[contains(text(), 'window.IBU_HOTEL')]/text()").get()
+        """Parse hotels in a city and save details"""
         city_name = response.meta.get('city_name', 'Unknown')
+        page = response.meta.get('page', 1)
+        city_id = response.meta.get('city_id')
 
         images_dir = os.path.join(os.getcwd(), 'hotel_images', city_name.lower().replace(' ', '_'))
         os.makedirs(images_dir, exist_ok=True)
 
+        script_data = response.xpath("//script[contains(text(), 'window.IBU_HOTEL')]/text()").get()
         if script_data:
             match = re.search(r"window\.IBU_HOTEL\s*=\s*(\{.*?\});", script_data, re.DOTALL)
             if match:
-                json_data = match.group(1)
                 try:
-                    ibu_hotel_data = json.loads(json_data)
+                    ibu_hotel_data = json.loads(match.group(1))
                     hotel_list = ibu_hotel_data.get("initData", {}).get("firstPageList", {}).get("hotelList", [])
+                    next_page = ibu_hotel_data.get("initData", {}).get("pagination", {}).get("nextPage")
 
                     for hotel in hotel_list:
-                        hotel_id = hotel.get("hotelBasicInfo", {}).get("hotelId", "")
-                        hotel_name = hotel.get("hotelBasicInfo", {}).get("hotelName", "").replace(" ", "_")
-                        image_url = hotel.get("hotelBasicInfo", {}).get("hotelImg", "")
+                        hotel_basic = hotel.get("hotelBasicInfo", {})
+                        position_info = hotel.get("positionInfo", {})
+                        comment_info = hotel.get("commentInfo", {})
+                        room_info = hotel.get("roomInfo", {})
 
-                        hotel_info = {
-                            "city_name": city_name,
-                            "property_title": hotel.get("hotelBasicInfo", {}).get("hotelName", ""),
-                            "hotel_id": hotel_id,
-                            "price": hotel.get("hotelBasicInfo", {}).get("price", ""),
-                            "rating": hotel.get("commentInfo", {}).get("commentScore", ""),
-                            "address": hotel.get("positionInfo", {}).get("positionName", ""),
-                            "latitude": hotel.get("positionInfo", {}).get("coordinate", {}).get("lat", ""),
-                            "longitude": hotel.get("positionInfo", {}).get("coordinate", {}).get("lng", ""),
-                            "room_type": hotel.get("roomInfo", {}).get("physicalRoomName", ""),
-                            "image": image_url
+                        hotel_id = hotel_basic.get("hotelId", "")
+                        hotel_name = hotel_basic.get("hotelName", "").replace(" ", "_")
+                        image_url = hotel_basic.get("hotelImg", "")
+
+                        property_data = {
+                            "title": hotel_basic.get("hotelName", ""),
+                            "rating": comment_info.get("commentScore", None),
+                            "location": position_info.get("positionName", ""),
+                            "latitude": position_info.get("coordinate", {}).get("lat", None),
+                            "longitude": position_info.get("coordinate", {}).get("lng", None),
+                            "room_type": room_info.get("physicalRoomName", None),
+                            "price": hotel_basic.get("price", None),
+                            "image_path": None
                         }
 
                         if image_url:
                             try:
                                 image_filename = f"{hotel_id}_{hotel_name}.jpg"
                                 image_path = os.path.join(images_dir, image_filename)
+                                response_img = requests.get(image_url)
 
-                                response = requests.get(image_url)
-                                if response.status_code == 200:
+                                if response_img.status_code == 200:
                                     with open(image_path, 'wb') as f:
-                                        f.write(response.content)
-
-                                    relative_image_path = os.path.join('hotel_images', city_name.lower().replace(' ', '_'), image_filename).replace('\\', '/')
-                                    hotel_info['local_image_path'] = relative_image_path
-                                    self.logger.info(f"Saved image for {hotel_name} at {image_path}")
+                                        f.write(response_img.content)
+                                    property_data['image_path'] = os.path.relpath(image_path)
                                 else:
                                     self.logger.warning(f"Failed to download image for {hotel_name}")
                             except Exception as e:
-                                self.logger.error(f"Error saving image for {hotel_name}: {e}")
+                                self.logger.error(f"Image download error: {e}")
 
-                        yield hotel_info
+                        save_to_database(property_data, self.session)
+                        save_to_json(property_data, self.json_file)
 
-                except json.JSONDecodeError as e:
-                    self.logger.error(f"Failed to parse JSON: {e}")
+                    # Handle pagination
+                    if next_page:
+                        next_page_url = f"https://uk.trip.com/hotels/list?city={city_id}&page={page + 1}"
+                        yield scrapy.Request(
+                            url=next_page_url,
+                            callback=self.parse_city_hotels,
+                            meta={'city_name': city_name, 'city_id': city_id, 'page': page + 1}
+                        )
+                except json.JSONDecodeError:
+                    self.logger.error("Failed to parse hotel list JSON")
                 except Exception as e:
-                    self.logger.error(f"An unexpected error occurred: {e}")
-
-# Database setup
-def setup_database():
-    engine = create_engine('postgresql+psycopg2://myuser:ualala@localhost:5432/tripcom_db')
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    return Session()
-
-# Save to database
-def save_to_database(data, session):
-    property = Property(**data)
-    session.add(property)
-    session.commit()
+                    self.logger.error(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
     session = setup_database()
+    json_file = "hotels_data.json"
+
+    # Clear JSON file before running
+    open(json_file, 'w').close()
 
     process = CrawlerProcess({
         'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'FEEDS': {
-            'output.json': {
-                'format': 'json',
-                'encoding': 'utf8',
-                'store_empty': False,
-                'fields': None,
-                'indent': 4,
-            },
-        },
     })
-
-    process.crawl(TripComSpider)
+    process.crawl(TripComSpider, session=session, json_file=json_file)
     process.start()

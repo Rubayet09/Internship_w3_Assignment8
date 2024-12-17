@@ -43,7 +43,10 @@ Ensure the following are installed on your system:
 ### Installing PostgreSQL
 1. If not installed, use Homebrew:
     ```bash
-    Copy code
+    sudo apt-get install build-essential procps curl file git
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
     brew install postgresql
     ```
 
@@ -80,6 +83,21 @@ Now run the following command to run the project.
 
 ```bash
 uv run python main.py
+```
+
+Database state view
+
+To see the current state of the database, please run the `database.py`  file, using the following command.
+
+```bash 
+uv run python database.py
+```
+
+Code coverage test
+
+To run the code coverage please run the following command.
+```bash
+uv run pytest test_main.py --cov=main --cov-report=term-missing
 ```
 
 ## Author
